@@ -5,11 +5,28 @@ public class PlayerController : MonoBehaviour
 {
     public float walkingSpeed = 7;
     public float mouseSens = 1;
+
+    public float gravity = 10;
+    public float terminalSpeed = 20;
+    public float verticalSpeed = 0;
+
+    public float jumpSpeed = 5;
+
     public Transform cameraTransform;
+    public Weapon weapon;
+
+
     float horizontalAngle;
     float verticalAngle;
     InputAction moveAction;
     InputAction lookAction;
+
+    InputAction fireAction;
+    InputAction reloadAction;
+
+
+    bool isGrounded;
+    float groundedTimer;
 
     CharacterController characterController;
     void Start()
@@ -21,6 +38,8 @@ public class PlayerController : MonoBehaviour
 
         moveAction = inputActions.FindAction("Move");
         lookAction = inputActions.FindAction("Look");
+        fireAction = inputActions.FindAction("Fire");
+        reloadAction = inputActions.FindAction("Reload");
 
         characterController = GetComponent<CharacterController>();
         verticalAngle = 0;
@@ -70,5 +89,58 @@ public class PlayerController : MonoBehaviour
         currentAngle.x = verticalAngle;
         cameraTransform.localEulerAngles = currentAngle;
 
+
+        //중력
+        verticalSpeed -= gravity * Time.deltaTime;
+        if(verticalSpeed < -terminalSpeed)
+        {
+            verticalSpeed = -terminalSpeed;
+        }
+
+        Vector3 verticalMove = new Vector3(0, verticalSpeed, 0);
+        verticalMove *= Time.deltaTime;
+
+        CollisionFlags flag = characterController.Move(verticalMove);
+
+        if((flag & (CollisionFlags.Below | CollisionFlags.Above)) != 0)
+        {
+            verticalSpeed = 0;
+        }
+
+        if (!characterController.isGrounded)
+        {
+            if (isGrounded)
+            {
+                groundedTimer += Time.deltaTime;
+                if(groundedTimer > 0.3f)
+                {
+                    isGrounded = false;
+                }
+            }
+        }
+        else
+        {
+            isGrounded = true;
+            groundedTimer = 0; 
+        }
+
+        //총 발사
+        if (fireAction.WasPressedThisFrame())
+        {
+            weapon.FireWeapon();
+        }
+        if (reloadAction.WasPressedThisFrame())
+        {
+            weapon.ReloadWeapon();
+        }
+    }
+
+    void OnJump()
+    {
+        if (isGrounded)
+        {
+            verticalSpeed = jumpSpeed;
+            isGrounded = false;
+        }
     }
 }
