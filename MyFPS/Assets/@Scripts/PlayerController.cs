@@ -1,5 +1,8 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -13,7 +16,9 @@ public class PlayerController : MonoBehaviour
     public float jumpSpeed = 5;
 
     public Transform cameraTransform;
-    public Weapon weapon;
+
+    public List<Weapon> weapons = new List<Weapon>();
+    public int currentWeaponIndex;
 
 
     float horizontalAngle;
@@ -127,12 +132,25 @@ public class PlayerController : MonoBehaviour
         //총 발사
         if (fireAction.WasPressedThisFrame())
         {
-            weapon.FireWeapon();
+            weapons[currentWeaponIndex].FireWeapon();
         }
         if (reloadAction.WasPressedThisFrame())
         {
-            weapon.ReloadWeapon();
+            weapons[currentWeaponIndex].ReloadWeapon();
         }
+    }
+
+    public void OnChangeWeapon()
+    {
+        weapons[currentWeaponIndex].gameObject.SetActive(false);
+
+        currentWeaponIndex++;
+        if (currentWeaponIndex > weapons.Count - 1)
+        {
+            currentWeaponIndex = 0;
+        }
+
+        weapons[currentWeaponIndex].gameObject.SetActive(true);
     }
 
     void OnJump()
