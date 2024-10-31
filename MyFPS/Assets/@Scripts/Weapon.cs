@@ -12,6 +12,8 @@ public class Weapon : MonoBehaviour
     public int currentBullet = 8;
     public int totalBullet = 32;
     public int maxBulletMagazine = 8;
+    public float damage;
+    public AudioClip gunShotSound;
 
     Animator animator;
 
@@ -36,7 +38,6 @@ public class Weapon : MonoBehaviour
                     animator.SetTrigger("Fire");
                     currentBullet--;
                     Fire();
-                    Debug.Log("22");
                 }
             }
             else
@@ -86,6 +87,7 @@ public class Weapon : MonoBehaviour
 
     public void RayCastFire()
     {
+        GetComponent<AudioSource>().PlayOneShot(gunShotSound);
         Camera cam = Camera.main;
 
         RaycastHit hit;
@@ -99,6 +101,11 @@ public class Weapon : MonoBehaviour
             GameObject particle = Instantiate(particlePrefab);
             particle.transform.position = hitPosition; 
             particle.transform.forward = hit.normal;
+
+            if(hit.collider.tag == "Enemy")
+            {
+                hit.collider.GetComponent<Health>().Damage(damage);
+            }
         }
 
         GameObject go = Instantiate(trailPrefab);

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour,Health.IHealthListener
 {
     public float walkingSpeed = 7;
     public float mouseSens = 1;
@@ -53,6 +53,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (!GameManager.Instance.isPlaying) return;
+
         //Move 평행이동
         Vector2 moveVector = moveAction.ReadValue<Vector2>();
 
@@ -160,5 +162,11 @@ public class PlayerController : MonoBehaviour
             verticalSpeed = jumpSpeed;
             isGrounded = false;
         }
+    }
+
+    public void OnDie()
+    {
+        GetComponent<Animator>().SetTrigger("Die");
+        GameManager.Instance.PlayeDie();
     }
 }
